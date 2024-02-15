@@ -1,0 +1,54 @@
+---
+title: "FA1-EDA-BAYQUEN"
+output: html_notebook
+---
+
+```{r}
+#loading the csv file into the dataset
+cytof_data<- read.csv("C:/Users/chris/Desktop/Productivity/Academics/College/3rd Year/2nd Semester/EDA/FA1/cytof_one_experiment.csv")
+
+cytof_data
+
+```
+
+**Choose one of the columns of the dataset and make at least two plots showing its distribution (choose from ECDF, quantile, histogram, density estimate). What does the plot tell you about the distribution of the values in that column?**
+
+```{r}
+#histogram of NKp30 column
+ggplot(data = NULL, aes(x = cytof_data$NKp30)) +
+  geom_histogram(binwidth = 1, fill = "salmon", color = "black", alpha = 0.7) +
+  labs(title = "Histogram of NKp30",
+       x = "NKp30",
+       y = "Frequency")
+```
+
+```{r}
+#density plot of NKp30 column
+ggplot(data = NULL, aes(x = cytof_data$NKp30)) +
+  geom_density(fill = "salmon", color = "black") +
+  labs(title = "Density Estimate of NKp30",
+       x = "NKp30",
+       y = "Density")
+```
+
+
+> *interpretation: * As we can see in both of the graphs of the column NKp30, we can visually observe the spread and shape of the NKp30 data's distribution. Shown in the histograph, it can be observed that the data shows no skewness within the values of the data and is in a bell-shaped curve-- implying a normal distribution. This observation can also be seen in the density estimate graph as it provides a smooth estiamte of the probability density function of the NKp30 values; a smooth bell-shaped curved is also shown. 
+
+**Choose any two of the columns of the data set and make a Q-Q plot comparing the distributions. What does the Q-Q plot tell you about similarities or differences between the distributions of the values in the two columns?**
+
+```{r}
+#Q-Q plot between NKp30 and NKp44
+
+#separating the two columns needed
+cytof_data2 <- cytof_data[,c(1,3)]
+cytof_data2
+
+# Set the x and y limits
+xylim <- range( c(cytof_data2$NKp30, cytof_data2$NKp44) )
+
+# Generate the QQ plot
+qqplot(x=cytof_data2$NKp30, y=cytof_data2$NKp44, main = "Q-Q Plot of NKp30 vs NKp44", xlab = "NKp30", ylab = "NKp44",asp=1)
+abline( c(0,1), col = 'red', lwd = 2, lty = 2)
+```
+> *interpretation: * the Q-Q plot above shows clearly shows us that the data points do not necessarily fall along a line all through out the graph, it can be seen that somewhere in the middle of the graph do they start following a trend, however skewed in the first part of the data points-- indicating that the data between the two columns likely does not follow a normal distribution. 
+
