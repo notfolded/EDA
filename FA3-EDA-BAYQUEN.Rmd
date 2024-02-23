@@ -1,0 +1,82 @@
+---
+title: "FA3 EDA"
+author: "Bayquen, Christopher Gilbert A."
+date: "2024-02-23"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **DIAMONDS DATA SET**
+
+```{r}
+library(ggplot2)
+diamonds_df <- diamonds
+diamonds_df
+```
+
+Creating the histogram plots for the diamonds dataset using the **layer() function**
+
+```{r}
+
+ggplot() +
+  layer(
+    data = diamonds,
+    mapping = aes(x = carat),
+    stat = "bin",
+    geom = "bar",
+    position = "stack",
+    inherit.aes = TRUE,
+    show.legend = NA,
+    )
+```
+
+Modifying the histogram code so that it uses a different **geom**
+
+```{r}
+ggplot() +
+  layer(
+    data = diamonds,
+    mapping = aes(x = carat),
+    stat = "bin",
+    geom = "smooth",
+    position = "identity",
+    inherit.aes = TRUE,
+    show.legend = NA
+  )
+
+```
+
+Adding aesthetic mapping to the histogram.
+```{r}
+ggplot() +
+  layer(
+    data = diamonds,
+    mapping = aes(x = carat, fill = clarity),
+    stat = "bin",
+    geom = "bar",
+    position = "stack",
+    inherit.aes = TRUE,
+    show.legend = NA,
+    )
+```
+
+Changing the Position Adjustment in the histogram
+
+```{r}
+ggplot() +
+  layer(
+    data = diamonds,
+    mapping = aes(x = carat, fill = clarity),
+    stat = "bin",
+    geom = "bar",
+    position = "dodge",
+    inherit.aes = TRUE,
+    show.legend = NA,
+    )
+
+```
