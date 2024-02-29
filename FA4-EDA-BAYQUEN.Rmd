@@ -1,0 +1,183 @@
+---
+title: "FA4-EDA"
+author: "Bayquen, Christopher Gilbert A."
+date: "2024-02-27"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## **FA4 : MORTALITY BY LATITUDE DATA**
+
+
+```{r}
+#loading the data set and necessary packages
+library(ggplot2)
+mortality_df <- read.csv("mortality_by_latitude.csv")
+mortality_df
+
+```
+
+<center> 
+
+```{r echo=FALSE}
+
+# Create a scatter plot of mortality index against mean average temperature
+p <- ggplot(mortality_df, aes(x = temperature, y = mortality_index)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  labs(title = "Mortality Index vs. Mean Average Temperature",
+       x = "Mean Average Temperature",
+       y = "Mortality Index") +
+  theme_minimal()
+
+# Add linear regression line to check the trend
+p + geom_smooth(method = "lm", se = FALSE,color = "red", linetype = "dashed" )
+
+```
+</center>
+
+**Try to identify a transformation of one of the variables that will straighten out the relationship, and make a plot of the residuals to check for any remaining patterns.**
+
+<center>
+
+```{r echo=FALSE}
+# Create a scatter plot of transformed mortality index against mean average temperature
+plot <- ggplot(mortality_df, aes(x = temperature, y = log10(mortality_index))) +
+  geom_point(color = "blue", alpha = 0.5) +
+  labs(title = "TransformedMortality Index vs. Mean Average Temperature",
+       x = "Mean Average Temperature",
+       y = "Transformed log10 Mortality Index") +
+  theme_minimal()
+
+# Add linear regression line to check the trend
+plot + geom_smooth(method = "lm", se = FALSE,color = "red", linetype = "dashed" )
+```
+
+
+```{r echo=FALSE}
+
+mortality_fit <- lm(mortality_df$mortality_index~mortality_df$temperature)
+
+# Create a scatter plot of mortality index against mean average temperature
+p <- ggplot(mortality_fit, aes(x = mortality_df$temperature, y = .resid)) +
+  geom_point(color = "blue", alpha = 0.5) +
+  labs(title = "Mortality Index vs. Mean Average Temperature Residual Plot") +
+  theme_minimal()
+
+# Add linear regression line to check the trend
+p + geom_smooth(method = "lm", se = FALSE,color = "red", linetype = "dashed" )
+```
+</center>
+
+> the residual plot does not show any trend or relationship between the two variables; the residuals are scattered randomly around the horizontal dashed line at y = 0, indicating that the model's errors are random and not correlated with mean average temperature.
+
+## **DIAMONDS DATA SET: a plot of log price as a function of carat with a loess smoother**
+
+```{r echo=FALSE}
+data(diamonds)
+diamonds
+
+
+
+
+```
+
+
+<center> 
+
+```{r echo=FALSE}
+# Subset the dataset to include only the required variables
+diamonds_subset <- diamonds %>%
+  select(carat, price) %>%
+  mutate(log_price = log(price))  # Create a new variable for log price
+
+# Create the plot
+ggplot(diamonds_subset, aes(x = carat, y = log_price)) +
+  geom_point() +  # Add points
+  geom_smooth(method = "loess", se = FALSE) +  # Add loess smoother without standard error
+  labs(x = "Carat", y = "Log Price", title = "Log Price vs. Carat with Loess Smoother") +  # Add labels
+  theme_minimal()  # Set minimal theme
+
+```
+
+**Trying several values for the span and degree arguments**
+
+*span = 0.1, degree = 1*
+
+```{r echo=FALSE}
+# Subset the dataset to include only the required variables
+diamonds_subset <- diamonds %>%
+  select(carat, price) %>%
+  mutate(log_price = log(price))  # Create a new variable for log price
+
+# Create the plot
+ggplot(diamonds_subset, aes(x = carat, y = log_price)) +
+  geom_point() +  # Add points
+  geom_smooth(method = "loess", se = FALSE, span = 0.1) + 
+  labs(x = "Carat", y = "Log Price", title = "Log Price vs. Carat with Loess Smoother") +  # Add labels
+  theme_minimal()  # Set minimal theme
+
+```
+*span = 0.1*
+
+```{r echo=FALSE}
+# Subset the dataset to include only the required variables
+diamonds_subset <- diamonds %>%
+  select(carat, price) %>%
+  mutate(log_price = log(price))  # Create a new variable for log price
+
+# Create the plot
+ggplot(diamonds_subset, aes(x = carat, y = log_price)) +
+  geom_point() +  # Add points
+  geom_smooth(method = "loess", se = FALSE, span = 0.5) + 
+  labs(x = "Carat", y = "Log Price", title = "Log Price vs. Carat with Loess Smoother") +  # Add labels
+  theme_minimal()  # Set minimal theme
+
+```
+
+*span = 0.5*
+
+**Compare the fit of the loess smoother to the fit of the polynomial + step function regression using a plot of the residuals in the two models**
+
+```{R echo=FALSE}
+# Fit a polynomial + step function regression
+polynomial_fit <- lm(log_price ~ poly(carat, 3) + I(carat^3), data = diamonds_subset)
+
+# Get predicted values and residuals for the polynomial + step function regression
+diamonds_subset$polynomial_predicted <- predict(polynomial_fit)
+diamonds_subset$polynomial_residuals <- residuals(polynomial_fit)
+
+# Plot residuals for the polynomial + step function regression
+ggplot(diamonds_subset, aes(x = carat, y = polynomial_residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(x = "Carat", y = "Residuals",
+       title = "Residuals for Polynomial + Step Function Regression") +
+  theme_minimal()
+
+# Fit a loess smoother
+loess_fit <- loess(log_price ~ carat, data = diamonds_subset, span = 0.5)
+
+# Get predicted values and residuals for the loess smoother
+diamonds_subset$loess_predicted <- predict(loess_fit)
+diamonds_subset$loess_residuals <- diamonds_subset$log_price - diamonds_subset$loess_predicted
+
+# Plot residuals for the loess smoother
+ggplot(diamonds_subset, aes(x = carat, y = loess_residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "blue") +
+  labs(x = "Carat", y = "Residuals",
+       title = "Residuals for Loess Smoother") +
+  theme_minimal()
+
+
+```
+</center>
+
+
+> The model with residuals that are closer to zero and show less systematic deviation from zero across the range of predictor values is considered more faithful to the data-- this means that the fit of the polynomial + step function regression is more faithful to the data. 
